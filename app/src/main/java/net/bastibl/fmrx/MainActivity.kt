@@ -40,45 +40,13 @@ class MainActivity : AppCompatActivity() {
 
         checkStoragePermission()
 
-//Check IP connection
-//        val ipAddressToCheck = "192.168.10.2" // Replace with the IP address you want to check
-//        val checkConnectionTask = CheckConnectionTask(this)
-//
-//        checkConnectionTask.setCallback(object : CheckConnectionTask.ConnectionCallback {
-//            override fun onConnectionResult(isConnected: Boolean) {
-//                if (isConnected) {
-//                    Toast.makeText(this@MainActivity, "Connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
-//                } else {
-//                    Toast.makeText(this@MainActivity, "Not connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        })
-//
-//        checkConnectionTask.execute(ipAddressToCheck)
-
         val startButton = findViewById<Button>(R.id.startButton)
         startButton.setOnClickListener {
             try {
-                val errorMessage = fgInit(1, "")
+                var errorMessage = fgInit(1, "")
                 displayNotification("Flowgraph initalised, error:${errorMessage}")
-//                if (isEthernetConnected()) {
-//                    displayNotification("Connected to Ethernet, starting flowgraph")
-//
-//                    try {
-//                        val errorMessage = fgInit(1, "")
-//                        displayNotification("Flowgraph initalised, error:${errorMessage}")
-//                    } catch (e: Exception) {
-//                        displayNotification("Flowgraph initalised error \n${e.message}")
-//                    }
-//
-//                    try {
-//                        fgStart(cacheDir.absolutePath)
-//                    } catch (e: Exception) {
-//                        displayNotification("Flowgraph run error \n${e.message}")
-//                    }
-//                } else {
-//                    displayNotification("Not connected to Ethernet")
-//                }
+                errorMessage = fgStart(cacheDir.absolutePath)
+                displayNotification("Flowgraph running, error:${errorMessage}")
             } catch (e: Exception) {
                 displayNotification("Error running app")
             }
@@ -115,34 +83,6 @@ class MainActivity : AppCompatActivity() {
         notificationManager.notify(1, notificationBuilder.build())
 
     }
-
-    private fun isEthernetConnected(): Boolean {
-        var result = false
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val networkCapabilities = connectivityManager.activeNetwork ?: return false
-            val actNw =
-                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-            result = when {
-                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                else -> false
-            }
-        } else {
-            connectivityManager.run {
-                connectivityManager.activeNetworkInfo?.run {
-                    result = when (type) {
-                        ConnectivityManager.TYPE_ETHERNET -> true
-                        else -> false
-                    }
-
-                }
-            }
-        }
-
-        return result
-    }
-
 
     private val usbReceiver = object : BroadcastReceiver() {
 
@@ -187,7 +127,9 @@ class MainActivity : AppCompatActivity() {
         deviceList.values.forEach { device ->
 //            if(device.vendorId == 0x0bda && device.productId == 0x2838) {
 //            if(device.vendorId == 0x1d50) {
-            if(device.vendorId == 0x2500) {
+//            if(device.vendorId == 0x2500) {
+//            if(true) {
+            if(device.vendorId == 0x0403) {
                 val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
                 val filter = IntentFilter(ACTION_USB_PERMISSION)
                 registerReceiver(usbReceiver, filter)
@@ -201,7 +143,7 @@ class MainActivity : AppCompatActivity() {
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             123 -> {
-//                sample_text.text = grConf()
+                sample_text.text = grConf()
                 checkHWPermission()
             }
         }
@@ -227,9 +169,11 @@ class MainActivity : AppCompatActivity() {
         sample_text.text =
             "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
-//        fgInit(fd, usbfsPath)
-//        fgStart(cacheDir.absolutePath)
 
+        var errorMessage = fgInit(fd, usbfsPath)
+        displayNotification("Flowgraph initalised\nError:${errorMessage}")
+        errorMessage = fgStart(cacheDir.absolutePath)
+        displayNotification("Flowgraph running\nError:${errorMessage}")
     }
 
     override fun onStop() {
@@ -238,7 +182,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private external fun fgInit(fd: Int, usbfsPath: String): String
-    private external fun fgStart(tmpName: String): Void
+    private external fun fgStart(tmpName: String): String
     external fun fgStop(): Void
     external fun fgRep(): String
     external fun grConf(): String
