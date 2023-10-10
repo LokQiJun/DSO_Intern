@@ -23,9 +23,9 @@ target_link_libraries(native-lib
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-runtime.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-pmt.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-blocks.so
-        ${TOOLCHAIN}/${ANDROID_ABI}/lib/libhackrf.so
+#        ${TOOLCHAIN}/${ANDROID_ABI}/lib/libhackrf.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libusb1.0.so
-        ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-osmosdr.so
+#        ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-osmosdr.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-grand.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-analog.so
         ${TOOLCHAIN}/${ANDROID_ABI}/lib/libgnuradio-filter.so

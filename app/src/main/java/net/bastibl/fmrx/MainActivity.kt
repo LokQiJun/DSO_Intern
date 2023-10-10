@@ -40,43 +40,45 @@ class MainActivity : AppCompatActivity() {
 
         checkStoragePermission()
 
-
-        val ipAddressToCheck = "192.168.10.2" // Replace with the IP address you want to check
-        val checkConnectionTask = CheckConnectionTask(this)
-
-        checkConnectionTask.setCallback(object : CheckConnectionTask.ConnectionCallback {
-            override fun onConnectionResult(isConnected: Boolean) {
-                if (isConnected) {
-                    Toast.makeText(this@MainActivity, "Connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@MainActivity, "Not connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
-
-        checkConnectionTask.execute(ipAddressToCheck)
+//Check IP connection
+//        val ipAddressToCheck = "192.168.10.2" // Replace with the IP address you want to check
+//        val checkConnectionTask = CheckConnectionTask(this)
+//
+//        checkConnectionTask.setCallback(object : CheckConnectionTask.ConnectionCallback {
+//            override fun onConnectionResult(isConnected: Boolean) {
+//                if (isConnected) {
+//                    Toast.makeText(this@MainActivity, "Connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    Toast.makeText(this@MainActivity, "Not connected to ${ipAddressToCheck}", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        })
+//
+//        checkConnectionTask.execute(ipAddressToCheck)
 
         val startButton = findViewById<Button>(R.id.startButton)
         startButton.setOnClickListener {
             try {
-                if (isEthernetConnected()) {
-                    displayNotification("Connected to Ethernet, starting flowgraph")
-
-                    try {
-                        val errorMessage = fgInit(1, "")
-                        displayNotification("Flowgraph initalised, error:${errorMessage}")
-                    } catch (e: Exception) {
-                        displayNotification("Flowgraph initalised error \n${e.message}")
-                    }
-
-                    try {
-                        fgStart(cacheDir.absolutePath)
-                    } catch (e: Exception) {
-                        displayNotification("Flowgraph run error \n${e.message}")
-                    }
-                } else {
-                    displayNotification("Not connected to Ethernet")
-                }
+                val errorMessage = fgInit(1, "")
+                displayNotification("Flowgraph initalised, error:${errorMessage}")
+//                if (isEthernetConnected()) {
+//                    displayNotification("Connected to Ethernet, starting flowgraph")
+//
+//                    try {
+//                        val errorMessage = fgInit(1, "")
+//                        displayNotification("Flowgraph initalised, error:${errorMessage}")
+//                    } catch (e: Exception) {
+//                        displayNotification("Flowgraph initalised error \n${e.message}")
+//                    }
+//
+//                    try {
+//                        fgStart(cacheDir.absolutePath)
+//                    } catch (e: Exception) {
+//                        displayNotification("Flowgraph run error \n${e.message}")
+//                    }
+//                } else {
+//                    displayNotification("Not connected to Ethernet")
+//                }
             } catch (e: Exception) {
                 displayNotification("Error running app")
             }
@@ -199,7 +201,7 @@ class MainActivity : AppCompatActivity() {
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             123 -> {
-                sample_text.text = grConf()
+//                sample_text.text = grConf()
                 checkHWPermission()
             }
         }
@@ -225,23 +227,8 @@ class MainActivity : AppCompatActivity() {
         sample_text.text =
             "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
-        fgInit(fd, usbfsPath)
-        fgStart(cacheDir.absolutePath)
-
-        thread(start = true) {
-            try {
-                connected = true
-
-                Looper.prepare()
-                Looper.loop()
-            } catch (e: InterruptedException) {
-                Log.d("rpcmain", "crashed $e")
-            }
-        }
-
-        while (!connected) {
-            Thread.sleep(250)
-        }
+//        fgInit(fd, usbfsPath)
+//        fgStart(cacheDir.absolutePath)
 
     }
 
