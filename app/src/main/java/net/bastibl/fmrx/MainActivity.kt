@@ -128,8 +128,8 @@ class MainActivity : AppCompatActivity() {
 //            if(device.vendorId == 0x0bda && device.productId == 0x2838) {
 //            if(device.vendorId == 0x1d50) {
 //            if(device.vendorId == 0x2500) {
-//            if(true) {
-            if(device.vendorId == 0x1d50) {
+            if(true) {
+//            if(device.vendorId == 0x1d50) {
                 val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
                 val filter = IntentFilter(ACTION_USB_PERMISSION)
                 registerReceiver(usbReceiver, filter)

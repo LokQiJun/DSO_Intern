@@ -55,23 +55,23 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
     int frequency = 48000;
     try {
 // Blocks:
-    gr::limesdr::source::sptr sdrSource = gr::limesdr::source::make("", 0, "", false);
+    gr::limesdr::source::sptr sdrSource = gr::limesdr::source::make("0009072C00D51D1F", 1, "", false);
         sdrSource->set_sample_rate(samp_rate);
-        sdrSource->set_center_freq(100e6, 0);
-        sdrSource->set_bandwidth(1.5e6, 0);
-        sdrSource->set_digital_filter(samp_rate, 0);
-        sdrSource->set_gain(1, 0);
-        sdrSource->set_antenna(255, 0);
-        sdrSource->calibrate(2.5e6, 0);
+        sdrSource->set_center_freq(100e6, 1);
+        sdrSource->set_bandwidth(1.5e6, 1);
+        sdrSource->set_digital_filter(samp_rate, 1);
+        sdrSource->set_gain(10, 1);
+        sdrSource->set_antenna(0, 1);
+        sdrSource->calibrate(2.5e6, 1);
 
-    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("", 0, "", "");
+    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("0009072C00D51D1F", 1, "", "");
         sdrSink->set_sample_rate(samp_rate);
-        sdrSink->set_center_freq(100e6, 0);
-        sdrSink->set_bandwidth(5e6, 0);
-        sdrSink->set_digital_filter(samp_rate, 0);
-        sdrSink->set_gain(1, 0);
-        sdrSink->set_antenna(255, 0);
-        sdrSink->calibrate(2.5e6, 0);
+        sdrSink->set_center_freq(100e6, 1);
+        sdrSink->set_bandwidth(5e6, 1);
+        sdrSink->set_digital_filter(samp_rate, 1);
+        sdrSink->set_gain(10, 1);
+        sdrSink->set_antenna(0, 1);
+        sdrSink->calibrate(2.5e6, 1);
 
 
     gr::blocks::sub_ff::sptr subNoise = gr::blocks::sub_ff::make(1);
@@ -116,7 +116,7 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
         return env->NewStringUTF(e.what());
     }
 
-    return env->NewStringUTF("");
+    return env->NewStringUTF("None");
 }
 
 extern "C"
