@@ -45,8 +45,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 var errorMessage = fgInit(1, "")
                 displayNotification("Flowgraph initalised, error:${errorMessage}")
-                errorMessage = fgStart(cacheDir.absolutePath)
-                displayNotification("Flowgraph running, error:${errorMessage}")
+//                errorMessage = fgStart(cacheDir.absolutePath)
+//                displayNotification("Flowgraph running, error:${errorMessage}")
             } catch (e: Exception) {
                 displayNotification("Error running app")
             }
@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
 
         val manager = getSystemService(Context.USB_SERVICE) as UsbManager
         val deviceList: HashMap<String, UsbDevice> = manager.deviceList
+
         deviceList.values.forEach { device ->
 //            if(device.vendorId == 0x0bda && device.productId == 0x2838) {
 //            if(device.vendorId == 0x1d50) {
@@ -133,6 +134,12 @@ class MainActivity : AppCompatActivity() {
                 val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
                 val filter = IntentFilter(ACTION_USB_PERMISSION)
                 registerReceiver(usbReceiver, filter)
+
+                val deviceName = device.deviceName
+                val vendorId = device.vendorId
+                val productId = device.productId
+                Log.d("USBDevice", "Name: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
+                displayNotification("USBDeviceName: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
 
                 manager.requestPermission(device, permissionIntent)
             }
@@ -144,7 +151,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             123 -> {
                 sample_text.text = grConf()
-                checkHWPermission()
+//                checkHWPermission()
             }
         }
     }
@@ -170,10 +177,10 @@ class MainActivity : AppCompatActivity() {
             "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
 
-        var errorMessage = fgInit(fd, usbfsPath)
-        displayNotification("Flowgraph initalised\nError:${errorMessage}")
-        errorMessage = fgStart(cacheDir.absolutePath)
-        displayNotification("Flowgraph running\nError:${errorMessage}")
+//        var errorMessage = fgInit(fd, usbfsPath)
+//        displayNotification("Flowgraph initalised\nError:${errorMessage}")
+//        errorMessage = fgStart(cacheDir.absolutePath)
+//        displayNotification("Flowgraph running\nError:${errorMessage}")
     }
 
     override fun onStop() {
