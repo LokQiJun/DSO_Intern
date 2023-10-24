@@ -185,7 +185,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
 
  
     libusb_device **list; 
-    int count = libusb_get_device_list(ctx, &list); 
+    int count = static_cast<int>(libusb_get_device_list(ctx, &list));
     if (count < 0) {
         libusb_exit(ctx); 
         return env->NewStringUTF("Failed to get USB device list"); 
@@ -205,7 +205,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
         usbInfo += "Vendor ID: 0x" + std::to_string(desc.idVendor) + " Product ID: 0x" + std::to_string(desc.idProduct) + "\n"; 
 
         libusb_device_handle *tempDev_handle(nullptr);
-        if(libusb_open(devs[i], &tempDev_handle) != 0 || tempDev_handle == nullptr) {
+        if(libusb_open(list[i], &tempDev_handle) != 0 || tempDev_handle == nullptr) {
             usbInfo += "Unable to open above USB device\n";
             continue;
         }
@@ -214,5 +214,5 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
     libusb_free_device_list(list, 1); 
     libusb_exit(ctx); 
 
-    return env->NewStringUTF(usbInfo); 
+    return env->NewStringUTF(usbInfo.c_str());
 }

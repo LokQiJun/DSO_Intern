@@ -27,7 +27,7 @@
         android:text="Start"
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintLeft_toLeftOf="parent"
-        ap:layout_constraintBottom_toTopOf="usbButton"
+        ap:layout_constraintBottom_toTopOf="@+id/usbButton"
         ap:layout_constraintTop_toTopOf="parent"/>
 
     <Button
@@ -38,6 +38,6 @@
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintLeft_toLeftOf="parent"
         ap:layout_constraintBottom_toBottomOf="parent"
-        ap:layout_constraintTop_toBottomOf="startButton"/>
+        ap:layout_constraintTop_toBottomOf="@+id/startButton"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
