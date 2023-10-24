@@ -180,7 +180,9 @@ JNIEXPORT jstring JNICALL
 Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
 { 
     libusb_context *ctx; 
-    libusb_init(&ctx); 
+    int r = libusb_init(&ctx);
+    if(r > 0) return env->NewStringUTF("Libusb init error");
+
  
     libusb_device **list; 
     int count = libusb_get_device_list(ctx, &list); 
@@ -191,7 +193,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
  
     std::string usbInfo;
 
-    for (size_t i = 0; i < count; ++i) { 
+    for (int i = 0; i < count; ++i) { 
         libusb_device *device = list[i]; 
         libusb_device_descriptor desc; 
         int r = libusb_get_device_descriptor(device, &desc); 
@@ -201,11 +203,16 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
  
         } 
         usbInfo += "Vendor ID: 0x" + std::to_string(desc.idVendor) + " Product ID: 0x" + std::to_string(desc.idProduct) + "\n"; 
+
+        libusb_device_handle *tempDev_handle(nullptr);
+        if(libusb_open(devs[i], &tempDev_handle) != 0 || tempDev_handle == nullptr) {
+            usbInfo += "Unable to open above USB device\n";
+            continue;
+        }
     } 
  
     libusb_free_device_list(list, 1); 
     libusb_exit(ctx); 
- 
-    // std::cout << "USB Connections:\n" << usbInfo << std::endl; 
+
     return env->NewStringUTF(usbInfo); 
 }
