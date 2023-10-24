@@ -27,7 +27,17 @@
         android:text="Start"
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintLeft_toLeftOf="parent"
-        ap:layout_constraintBottom_toBottomOf="parent"
+        ap:layout_constraintBottom_toTopOf="usbButton"
         ap:layout_constraintTop_toTopOf="parent"/>
+
+    <Button
+        android:id="@+id/usbButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Check USB"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintBottom_toBottomOf="parent"
+        ap:layout_constraintTop_toBottomOf="startButton"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

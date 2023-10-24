@@ -44,11 +44,21 @@ class MainActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             try {
                 var errorMessage = fgInit(1, "")
-                displayNotification("Flowgraph initalised, error:${errorMessage}")
+                displayNotification("Flowgraph initalised\nError:${errorMessage}")
 //                errorMessage = fgStart(cacheDir.absolutePath)
 //                displayNotification("Flowgraph running, error:${errorMessage}")
             } catch (e: Exception) {
                 displayNotification("Error running app")
+            }
+        }
+
+        val usbButton = findViewById<Button>(R.id.usbButton)
+        usbButton.setOnClickListener {
+            try {
+                var errorMessage = checkUSB()
+                displayNotification("USB Connections:\n${errorMessage}")
+            } catch (e: Exception) {
+                displayNotification("Error running JNI code to check USB connections")
             }
         }
     }
@@ -193,6 +203,7 @@ class MainActivity : AppCompatActivity() {
     external fun fgStop(): Void
     external fun fgRep(): String
     external fun grConf(): String
+    external fun checkUSB(): String
 
     companion object {
         init {

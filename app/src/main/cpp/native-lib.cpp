@@ -30,6 +30,8 @@
 #include <gnuradio/sys_paths.h>
 #include <gnuradio/logger.h>
 
+#include <libusb.h>
+
 gr::top_block_sptr tb;
 
 
@@ -135,7 +137,7 @@ Java_net_bastibl_fmrx_MainActivity_fgStart(JNIEnv * env, jobject thiz, jstring t
         return env->NewStringUTF(e.what());
     }
 
-    return env->NewStringUTF("");
+    return env->NewStringUTF("None");
 }
 
 extern "C"
@@ -171,4 +173,39 @@ Java_net_bastibl_fmrx_MainActivity_grConf(JNIEnv *env, jobject thiz) {
                        "\n\n Compiler Flags: " + compilerFlags;
 
     return env->NewStringUTF(gr::prefs::singleton()->to_string().c_str());
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
+{ 
+    libusb_context *ctx; 
+    libusb_init(&ctx); 
+ 
+    libusb_device **list; 
+    int count = libusb_get_device_list(ctx, &list); 
+    if (count < 0) {
+        libusb_exit(ctx); 
+        return env->NewStringUTF("Failed to get USB device list"); 
+    } 
+ 
+    std::string usbInfo;
+
+    for (size_t i = 0; i < count; ++i) { 
+        libusb_device *device = list[i]; 
+        libusb_device_descriptor desc; 
+        int r = libusb_get_device_descriptor(device, &desc); 
+        if (r < 0) { 
+            usbInfo += "Failed to get device descriptor for Index: " + std::to_string(i) + "\n"; 
+            continue; 
+ 
+        } 
+        usbInfo += "Vendor ID: 0x" + std::to_string(desc.idVendor) + " Product ID: 0x" + std::to_string(desc.idProduct) + "\n"; 
+    } 
+ 
+    libusb_free_device_list(list, 1); 
+    libusb_exit(ctx); 
+ 
+    // std::cout << "USB Connections:\n" << usbInfo << std::endl; 
+    return env->NewStringUTF(usbInfo); 
 }
