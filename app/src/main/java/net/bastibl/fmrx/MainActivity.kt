@@ -30,7 +30,7 @@ private const val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
 
 class MainActivity : AppCompatActivity() {
 
-    val textView = findViewById<TextView>(R.id.sampleText)
+//    val textView = findViewById<TextView>(R.id.sampleText)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,7 +172,8 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         Log.d("GR", "permission denied for device $device")
-                        textView.text = "permission denied for device $device"
+//                        textView.text = "permission denied for device $device"
+                        displayNotification("Permission denied for device $device")
                     }
                 }
             }
@@ -198,8 +199,8 @@ class MainActivity : AppCompatActivity() {
         Log.d("gnuradio", "Found fd: $fd  usbfs_path: $usbfsPath")
         Log.d("gnuradio", "Found vid: $vid  pid: $pid")
 
-        textView.text =
-            "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
+//        textView.text =
+//            "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
         val usbDeviceConnection: UsbDeviceConnection = manager.openDevice(usbDevice)
         fileDescriptor = usbDeviceConnection.fileDescriptor

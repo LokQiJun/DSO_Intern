@@ -16,7 +16,6 @@
         android:text="Hello World!"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="#FF0000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="parent" />
