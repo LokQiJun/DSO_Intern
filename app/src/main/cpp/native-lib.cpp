@@ -31,7 +31,6 @@
 #include <gnuradio/logger.h>
 
 #include <libusb.h>
-
 gr::top_block_sptr tb;
 
 
@@ -155,14 +154,14 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
 { 
     libusb_context *ctx; 
     int r = libusb_init(&ctx);
-    if(r < 0) return env->NewStringUTF(std::to_string(r) + "Libusb init error");
+    if(r < 0) return env->NewStringUTF((std::to_string(r) + "Libusb init error").c_str());
 
  
     libusb_device **list; 
     int count = static_cast<int>(libusb_get_device_list(ctx, &list));
     if (count < 0) {
         libusb_exit(ctx); 
-        return env->NewStringUTF(std::to_string(r) + "Failed to get USB device list"); 
+        return env->NewStringUTF((std::to_string(r) + "Failed to get USB device list").c_str());
     } else if (count == 0) {
         libusb_free_device_list(list, 1); 
         libusb_exit(ctx);
@@ -198,20 +197,24 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
 // from https://github.com/libusb/libusb/blob/master/android/README
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz, jint fileDescriptor)
+Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint fileDescriptor)
 { 
     //Setting up and init
-    libusb_context *ctx; 
-    libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+    libusb_context *ctx;
+//      /home/android/src/AM_Lime/app/src/main/cpp/native-lib.cpp:204:29: error: use of undeclared identifier 'LIBUSB_OPTION_NO_DEVICE_DISCOVERY'
+//    libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+///home/android/src/AM_Lime/app/src/main/cpp/native-lib.cpp:207:5: error: no matching function for call to 'libusb_set_option'
+///home/android/src/gnuradio-android/toolchain/arm64-v8a/include/libusb.h:2063:17: note: candidate function not viable: no known conversion from 'libusb_context **' to 'libusb_context *' for 1st argument; remove &
+//    libusb_set_option(&ctx, 2, NULL);
     int r = libusb_init(&ctx);
-    if(r < 0) return env->NewStringUTF(std::to_string(r) + ": Libusb init error");
+    if(r < 0) return env->NewStringUTF((std::to_string(r) + ": Libusb init error").c_str());
 
     //Wrapping an existing system device
     libusb_device_handle *devh;
     r = libusb_wrap_sys_device(NULL, (intptr_t)fileDescriptor, &devh);
     if(r < 0) {
         libusb_exit(ctx);
-        return env->NewStringUTF(std::to_string(r) + ": Error wrapping system device");
+        return env->NewStringUTF((std::to_string(r) + ": Error wrapping system device").c_str());
     }
 
     std::string usbInfo;
@@ -238,13 +241,13 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz, jint file
             struct libusb_device_descriptor desc;
             r = libusb_get_device_descriptor(dev, &desc);
             if (r < 0) {
-                usbInfo += std::to_string(r) + ": Error getting device descriptor\n"
+                usbInfo += std::to_string(r) + ": Error getting device descriptor\n";
             } else {
                 //Read device addr
                 int pid = desc.idProduct;
                 int vid = desc.idVendor;
                 r = std::sprintf(data, "%.4x:%.4x", int(vid), int(pid));
-                if (r > 0) usbInfo += "Addr: " std::string(data, size_t(r)) + "\n";
+                if (r > 0) usbInfo += "Addr: " + std::string(data, size_t(r)) + "\n";
                 else usbInfo += std::to_string(r) + ": Error getting device addr\n";
 
                 //Read serial number

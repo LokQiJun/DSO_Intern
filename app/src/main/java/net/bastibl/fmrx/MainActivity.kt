@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.content.IntentFilter
@@ -21,14 +20,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.widget.Button
-import android.widget.Toast
+import android.widget.TextView
 import androidx.core.app.NotificationManagerCompat
 
 import java.util.HashMap;
-import kotlin.concurrent.thread
 
 private const val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
 
@@ -70,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 if(fileDescriptor == -1){
                     displayNotification("Invalid Filedescriptor\nDevice is not opened")
                 } else {
-                    var usbList = checkUSB(fileDescriptor)
+                    var usbList = checkUSBTwo(fileDescriptor)
                     displayNotification("USB Connections:\n${usbList}")
                 }
             } catch (e: Exception) {
@@ -183,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val fileDescriptor: Int = -1
+    var fileDescriptor: Int = -1
 
     @SuppressLint("SetTextI18n")
     fun setupUSB(usbDevice: UsbDevice) {
@@ -205,7 +201,7 @@ class MainActivity : AppCompatActivity() {
         textView.text =
             "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
-        val usbDeviceConnection: UsbDeviceConnection = usbManager.openDevice(usbDevice)
+        val usbDeviceConnection: UsbDeviceConnection = manager.openDevice(usbDevice)
         fileDescriptor = usbDeviceConnection.fileDescriptor
 
 //        var errorMessage = fgInit(fd, usbfsPath)
@@ -222,7 +218,7 @@ class MainActivity : AppCompatActivity() {
     private external fun fgStart(tmpName: String): String
     external fun fgStop(): Void
     external fun checkUSB(): String
-    external fun checkUSB(fd: Int): String
+    external fun checkUSBTwo(fd: Int): String
 
     companion object {
         init {
