@@ -9,13 +9,14 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/sample_text"
+        android:id="@+id/sampleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="Hello World!"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:textColor="#FF0000"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="parent" />
@@ -31,12 +32,22 @@
         ap:layout_constraintTop_toTopOf="parent"/>
 
     <Button
-        android:id="@+id/usbButton"
+        android:id="@+id/usbButton1"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Check USB"
-        ap:layout_constraintRight_toRightOf="parent"
+        android:text="Check USB\n(LimeSuite)"
+        ap:layout_constraintRight_toRightOf="@+id/usbButton2"
         ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintBottom_toBottomOf="parent"
+        ap:layout_constraintTop_toBottomOf="@+id/startButton"/>
+
+    <Button
+        android:id="@+id/usbButton2"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Check USB\n(Github)"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintLeft_toLeftOf="@+id/usbButton1"
         ap:layout_constraintBottom_toBottomOf="parent"
         ap:layout_constraintTop_toBottomOf="@+id/startButton"/>
 

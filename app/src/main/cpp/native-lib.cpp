@@ -151,45 +151,23 @@ Java_net_bastibl_fmrx_MainActivity_fgStop(JNIEnv * env, jobject thiz) {
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_net_bastibl_fmrx_MainActivity_fgRep(JNIEnv * env, jobject thiz) {
-
-    return env->NewStringUTF(tb->edge_list().c_str());
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_net_bastibl_fmrx_MainActivity_grConf(JNIEnv *env, jobject thiz) {
-
-    std::string ver = gr::version();
-    std::string cCompiler = gr::c_compiler();
-    std::string cxxCompiler = gr::cxx_compiler();
-    std::string compilerFlags = gr::compiler_flags();
-    std::string prefs = gr::prefs::singleton()->to_string();
-
-    std::string conf = "GNU Radio Version: " + ver +
-                       "\n\n C Compiler: " + cCompiler +
-                       "\n\n CXX Compiler: " + cxxCompiler +
-                       "\n\n Prefs: " + prefs +
-                       "\n\n Compiler Flags: " + compilerFlags;
-
-    return env->NewStringUTF(gr::prefs::singleton()->to_string().c_str());
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
 Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
 { 
     libusb_context *ctx; 
     int r = libusb_init(&ctx);
-    if(r > 0) return env->NewStringUTF("Libusb init error");
+    if(r < 0) return env->NewStringUTF(std::to_string(r) + "Libusb init error");
 
  
     libusb_device **list; 
     int count = static_cast<int>(libusb_get_device_list(ctx, &list));
     if (count < 0) {
         libusb_exit(ctx); 
-        return env->NewStringUTF("Failed to get USB device list"); 
-    } 
+        return env->NewStringUTF(std::to_string(r) + "Failed to get USB device list"); 
+    } else if (count == 0) {
+        libusb_free_device_list(list, 1); 
+        libusb_exit(ctx);
+        return env->NewStringUTF("Empty USB device list"); 
+    }
  
     std::string usbInfo;
 
@@ -198,7 +176,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
         libusb_device_descriptor desc; 
         int r = libusb_get_device_descriptor(device, &desc); 
         if (r < 0) { 
-            usbInfo += "Failed to get device descriptor for Index: " + std::to_string(i) + "\n"; 
+            usbInfo += std::to_string(r) + ": Failed to get device descriptor for Index: " + std::to_string(i) + "\n"; 
             continue; 
  
         } 
@@ -213,6 +191,80 @@ Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz)
  
     libusb_free_device_list(list, 1); 
     libusb_exit(ctx); 
+
+    return env->NewStringUTF(usbInfo.c_str());
+}
+
+// from https://github.com/libusb/libusb/blob/master/android/README
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_net_bastibl_fmrx_MainActivity_checkUSB(JNIEnv *env, jobject thiz, jint fileDescriptor)
+{ 
+    //Setting up and init
+    libusb_context *ctx; 
+    libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+    int r = libusb_init(&ctx);
+    if(r < 0) return env->NewStringUTF(std::to_string(r) + ": Libusb init error");
+
+    //Wrapping an existing system device
+    libusb_device_handle *devh;
+    r = libusb_wrap_sys_device(NULL, (intptr_t)fileDescriptor, &devh);
+    if(r < 0) {
+        libusb_exit(ctx);
+        return env->NewStringUTF(std::to_string(r) + ": Error wrapping system device");
+    }
+
+    std::string usbInfo;
+    char data[255];
+    try {
+        //read device name
+        r = libusb_get_string_descriptor_ascii(devh, LIBUSB_CLASS_COMM, (unsigned char*)data, sizeof(data));
+        if(r > 0) usbInfo += "Name: " + std::string(data, size_t(r)) + "\n";
+        else usbInfo += std::to_string(r) + ": Error getting device name\n";
+
+        //Opening device from the handle
+        libusb_device *dev = libusb_get_device(devh);
+        if (dev) {
+            //Check operating speed
+            int speed = libusb_get_device_speed(dev);
+            if(speed == LIBUSB_SPEED_HIGH)
+                usbInfo += "Media: USB 2.0\n";
+            else if(speed == LIBUSB_SPEED_SUPER)
+                usbInfo += "Media: USB 3.0\n";
+            else
+                usbInfo += "Media: USB\n";
+
+            //Get device descriptor
+            struct libusb_device_descriptor desc;
+            r = libusb_get_device_descriptor(dev, &desc);
+            if (r < 0) {
+                usbInfo += std::to_string(r) + ": Error getting device descriptor\n"
+            } else {
+                //Read device addr
+                int pid = desc.idProduct;
+                int vid = desc.idVendor;
+                r = std::sprintf(data, "%.4x:%.4x", int(vid), int(pid));
+                if (r > 0) usbInfo += "Addr: " std::string(data, size_t(r)) + "\n";
+                else usbInfo += std::to_string(r) + ": Error getting device addr\n";
+
+                //Read serial number
+                if (desc.iSerialNumber > 0)
+                {
+                    r = libusb_get_string_descriptor_ascii(devh, desc.iSerialNumber,(unsigned char*)data, sizeof(data));
+                    if (r < 0) usbInfo += "Failed to get serial number\n";
+                    else usbInfo += "Serial Num: " + std::string(data, size_t(r)) + "\n";
+                }
+            }
+        } else {
+            usbInfo += "Error Opening device from device handler";
+        }
+
+        //Release resources
+        libusb_close(devh);
+        libusb_exit(ctx); 
+    } catch (const std::exception &e) {
+        usbInfo += e.what();
+    }
 
     return env->NewStringUTF(usbInfo.c_str());
 }

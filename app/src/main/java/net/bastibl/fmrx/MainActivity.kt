@@ -34,6 +34,8 @@ private const val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
 
 class MainActivity : AppCompatActivity() {
 
+    val textView = findViewById<TextView>(R.id.sampleText)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,11 +54,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val usbButton = findViewById<Button>(R.id.usbButton)
-        usbButton.setOnClickListener {
+        val usbButton1 = findViewById<Button>(R.id.usbButton1)
+        usbButton1.setOnClickListener {
             try {
-                var errorMessage = checkUSB()
-                displayNotification("USB Connections:\n${errorMessage}")
+                var usbList = checkUSB()
+                displayNotification("USB Connections:\n${usbList}")
+            } catch (e: Exception) {
+                displayNotification("Error running JNI code to check USB connections")
+            }
+        }
+
+        val usbButton2 = findViewById<Button>(R.id.usbButton2)
+        usbButton2.setOnClickListener {
+            try {
+                if(fileDescriptor == -1){
+                    displayNotification("Invalid Filedescriptor\nDevice is not opened")
+                } else {
+                    var usbList = checkUSB(fileDescriptor)
+                    displayNotification("USB Connections:\n${usbList}")
+                }
             } catch (e: Exception) {
                 displayNotification("Error running JNI code to check USB connections")
             }
@@ -94,6 +110,58 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun checkStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                123)
+        } else {
+            checkHWPermission()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            123 -> {
+               checkHWPermission()
+            }
+        }
+    }
+    
+    private fun checkHWPermission() {
+        //Getting USB service
+        val manager = getSystemService(Context.USB_SERVICE) as UsbManager
+        //Getting list of connected USB device
+        val deviceList: HashMap<String, UsbDevice> = manager.deviceList
+            
+        // Iterating through each connected USB device
+        deviceList.values.forEach { device ->
+            if(true) {
+//            if(device.vendorId == 0x2500) { //USRP
+//            if(device.vendorId == 0x1d50) { //LimeSDR
+                // Preparing the permission request broadcast
+                val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
+                // Creating an intent filter for USB permission
+                val filter = IntentFilter(ACTION_USB_PERMISSION)
+                // Registering a broadcast receiver for USB permission
+                registerReceiver(usbReceiver, filter)
+
+                // Extracting information about the USB device
+                val deviceName = device.deviceName
+                val vendorId = device.vendorId
+                val productId = device.productId
+                Log.d("USBDevice", "Name: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
+                displayNotification("USBDeviceName: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
+
+                manager.requestPermission(device, permissionIntent)
+            }
+        }
+    }
+
     private val usbReceiver = object : BroadcastReceiver() {
 
         @Suppress("IMPLICIT_CAST_TO_ANY")
@@ -108,63 +176,14 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         Log.d("GR", "permission denied for device $device")
+                        textView.text = "permission denied for device $device"
                     }
                 }
             }
         }
     }
 
-    @Volatile var connected = false
-
-    private fun checkStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                123)
-        } else {
-            sample_text.text = grConf()
-            checkHWPermission()
-        }
-    }
-
-    private fun checkHWPermission() {
-
-        val manager = getSystemService(Context.USB_SERVICE) as UsbManager
-        val deviceList: HashMap<String, UsbDevice> = manager.deviceList
-
-        deviceList.values.forEach { device ->
-//            if(device.vendorId == 0x0bda && device.productId == 0x2838) {
-//            if(device.vendorId == 0x1d50) {
-//            if(device.vendorId == 0x2500) {
-            if(true) {
-//            if(device.vendorId == 0x1d50) {
-                val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0)
-                val filter = IntentFilter(ACTION_USB_PERMISSION)
-                registerReceiver(usbReceiver, filter)
-
-                val deviceName = device.deviceName
-                val vendorId = device.vendorId
-                val productId = device.productId
-                Log.d("USBDevice", "Name: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
-                displayNotification("USBDeviceName: $deviceName, Vendor ID: $vendorId, Product ID: $productId")
-
-                manager.requestPermission(device, permissionIntent)
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
-        when (requestCode) {
-            123 -> {
-                sample_text.text = grConf()
-//                checkHWPermission()
-            }
-        }
-    }
+    val fileDescriptor: Int = -1
 
     @SuppressLint("SetTextI18n")
     fun setupUSB(usbDevice: UsbDevice) {
@@ -183,9 +202,11 @@ class MainActivity : AppCompatActivity() {
         Log.d("gnuradio", "Found fd: $fd  usbfs_path: $usbfsPath")
         Log.d("gnuradio", "Found vid: $vid  pid: $pid")
 
-        sample_text.text =
+        textView.text =
             "Found fd: $fd  usbfsPath: $usbfsPath vid: $vid  pid: $pid"
 
+        val usbDeviceConnection: UsbDeviceConnection = usbManager.openDevice(usbDevice)
+        fileDescriptor = usbDeviceConnection.fileDescriptor
 
 //        var errorMessage = fgInit(fd, usbfsPath)
 //        displayNotification("Flowgraph initalised\nError:${errorMessage}")
@@ -195,15 +216,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        //fgStop()
     }
 
     private external fun fgInit(fd: Int, usbfsPath: String): String
     private external fun fgStart(tmpName: String): String
     external fun fgStop(): Void
-    external fun fgRep(): String
-    external fun grConf(): String
     external fun checkUSB(): String
+    external fun checkUSB(fd: Int): String
 
     companion object {
         init {
