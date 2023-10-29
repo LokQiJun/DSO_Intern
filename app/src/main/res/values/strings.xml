@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">GNU Radio AM LIME</string>
+    <string name="USBButton1">Check USB\n(LimeSuite)</string>
+    <string name="USBButton2">Check USB\n(Github)</string>
+    <string name="StartButton">Start</string>
 </resources>

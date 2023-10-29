@@ -201,11 +201,6 @@ Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint f
 { 
     //Setting up and init
     libusb_context *ctx;
-//      /home/android/src/AM_Lime/app/src/main/cpp/native-lib.cpp:204:29: error: use of undeclared identifier 'LIBUSB_OPTION_NO_DEVICE_DISCOVERY'
-//    libusb_set_option(&ctx, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
-///home/android/src/AM_Lime/app/src/main/cpp/native-lib.cpp:207:5: error: no matching function for call to 'libusb_set_option'
-///home/android/src/gnuradio-android/toolchain/arm64-v8a/include/libusb.h:2063:17: note: candidate function not viable: no known conversion from 'libusb_context **' to 'libusb_context *' for 1st argument; remove &
-//    libusb_set_option(&ctx, 2, NULL);
     int r = libusb_init(&ctx);
     if(r < 0) return env->NewStringUTF((std::to_string(r) + ": Libusb init error").c_str());
 
@@ -264,7 +259,6 @@ Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint f
 
         //Release resources
         libusb_close(devh);
-        libusb_exit(ctx); 
     } catch (const std::exception &e) {
         usbInfo += e.what();
     }

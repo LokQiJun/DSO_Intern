@@ -14,27 +14,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="Hello World!"
-        android:textSize="18sp"
+        android:textSize="15sp"
         android:textStyle="bold"
+        android:textColor="#FF0000"
+        android:gravity="center_horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/startButton"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Start"
+        android:text="@string/StartButton"
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintLeft_toLeftOf="parent"
-        ap:layout_constraintBottom_toTopOf="@+id/usbButton"
-        ap:layout_constraintTop_toTopOf="parent"/>
+        ap:layout_constraintBottom_toTopOf="@+id/usbButton1"
+        ap:layout_constraintTop_toTopOf="@id/sampleText"/>
 
     <Button
         android:id="@+id/usbButton1"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Check USB\n(LimeSuite)"
+        android:text="@string/USBButton1"
         ap:layout_constraintRight_toRightOf="@+id/usbButton2"
         ap:layout_constraintLeft_toLeftOf="parent"
         ap:layout_constraintBottom_toBottomOf="parent"
@@ -44,7 +46,7 @@
         android:id="@+id/usbButton2"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="Check USB\n(Github)"
+        android:text="@string/USBButton2"
         ap:layout_constraintRight_toRightOf="parent"
         ap:layout_constraintLeft_toLeftOf="@+id/usbButton1"
         ap:layout_constraintBottom_toBottomOf="parent"
