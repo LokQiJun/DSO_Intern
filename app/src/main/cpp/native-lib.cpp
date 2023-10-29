@@ -259,6 +259,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint f
 
         //Release resources
         libusb_close(devh);
+	libusb_exit(ctx);
     } catch (const std::exception &e) {
         usbInfo += e.what();
     }
