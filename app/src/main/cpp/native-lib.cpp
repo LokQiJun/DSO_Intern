@@ -208,6 +208,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint f
 { 
     //Setting up and init
     libusb_context *ctx;
+	libusb_set_option(&ctx, LIBUSB_OPTION_WEAK_AUTHORITY, NULL);
     int r = libusb_init(&ctx);
     if(r < 0) return env->NewStringUTF((std::to_string(r) + ": Libusb init error").c_str());
 
