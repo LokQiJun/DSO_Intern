@@ -30,6 +30,9 @@ private const val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
 
 class MainActivity : AppCompatActivity() {
 
+    var fileDescriptor: Int = -1
+    var usbfsPath = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val startButton = findViewById<Button>(R.id.startButton)
         startButton.setOnClickListener {
             try {
-                var errorMessage = fgInit(1, "")
+                var errorMessage = fgInit(fileDescriptor, "")
                 displayNotification("Flowgraph initalised\nError:${errorMessage}")
 //                errorMessage = fgStart(cacheDir.absolutePath)
 //                displayNotification("Flowgraph running, error:${errorMessage}")
@@ -178,8 +181,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    var fileDescriptor: Int = -1
 
     @SuppressLint("SetTextI18n")
     fun setupUSB(usbDevice: UsbDevice) {

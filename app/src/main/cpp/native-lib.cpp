@@ -12,17 +12,16 @@
 #include <gnuradio/fft/ctrlport_probe_psd.h>
 
 #include <gnuradio/top_block.h>
-#include <gnuradio/analog/sig_source.h>
-#include <gnuradio/blocks/add_blk.h>
-#include <gnuradio/blocks/complex_to_mag.h>
+#include <gnuradio/blocks/add_const_ff.h>
 #include <gnuradio/blocks/float_to_complex.h>
-#include <gnuradio/blocks/multiply.h>
-#include <gnuradio/blocks/sub.h>
-#include <gnuradio/blocks/wavfile_sink.h>
+#include <gnuradio/blocks/multiply_const.h>
+#include <gnuradio/blocks/null_source.h>
+#include <gnuradio/blocks/repeat.h>
 #include <gnuradio/blocks/wavfile_source.h>
 #include <gnuradio/filter/firdes.h>
 #include <gnuradio/filter/interp_fir_filter.h>
 #include <gnuradio/filter/fir_filter_blk.h>
+
 #include <limesdr/source.h>
 #include <limesdr/sink.h>
 
@@ -39,33 +38,22 @@ JNIEXPORT jstring JNICALL
 Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, jstring usbfsPath) {
 
     setenv("VOLK_CONFIGPATH", getenv("EXTERNAL_STORAGE"), 1);
-//    setenv("GR_CONF_CONTROLPORT_ON", "true", 1);
 
-
-//    const char *usbfs_path = env->GetStringUTFChars(usbfsPath, NULL);
+    const char *usbfs_path = env->GetStringUTFChars(usbfsPath, NULL);
 
     tb = gr::make_top_block("AM mod demod");
 
-//    std::stringstream args;
-//    args << "bbl=foo,type=b200,fd=" << fd << ",usbfs_path=" << usbfs_path;
-//    GR_INFO("fg", boost::str(boost::format("Using UHD args=%1%") % args.str()));
 
 // Variables:
-    int samp_rate = 480000;
-    double gain = 0.5;
-    int frequency = 48000;
+    double sdr_rate = 2e6;
+    double samp_rate = 48e3;
+    int decim = 16;
+    double center_freq = 100e6;
+    float audio_gain = 0.8;
     try {
 // Blocks:
-//    gr::limesdr::source::sptr sdrSource = gr::limesdr::source::make("0009072C00D51D1F", 1, "", false);
-//        sdrSource->set_sample_rate(samp_rate);
-//        sdrSource->set_center_freq(100e6, 1);
-//        sdrSource->set_bandwidth(1.5e6, 1);
-//        sdrSource->set_digital_filter(samp_rate, 1);
-//        sdrSource->set_gain(10, 1);
-//        sdrSource->set_antenna(0, 1);
-//        sdrSource->calibrate(2.5e6, 1);
 
-    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("", 0, "", ""); //serial="0009072C00D51D1F"
+    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("", 0, "", "", fd); //serial="0009072C00D51D1F"
         sdrSink->set_sample_rate(samp_rate);
         sdrSink->set_center_freq(100e6, 0);
         sdrSink->set_bandwidth(5e6, 0);
@@ -74,6 +62,31 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
         sdrSink->set_antenna(0, 0);
         sdrSink->calibrate(2.5e6, 0);
 
+    gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);;
+    gr::blocks::repeat::sptr repeat = gr::blocks::repeat::make(sizeof(float)*1, decim);;
+    gr::blocks::null_source::sptr nullSource = gr::blocks::null_source::make(sizeof(float)*1);;
+    gr::blocks::multiply_const_ff::sptr multiplyGain = gr::blocks::multiply_const_ff::make(audio_gain);;
+    gr::blocks::float_to_complex::sptr floatComplex = gr::blocks::float_to_complex::make(1);;
+    gr::blocks::add_const_ff::sptr addConst = gr::blocks::add_const_ff::make(1);
+    gr::filter::fir_filter_ccf::sptr lpf = gr::filter::fir_filter_ccf::make(
+            1,
+            gr::filter::firdes::low_pass(
+                    1,
+                    samp_rate,
+                    12e3,
+                    2e3,
+                    gr::filter::firdes::WIN_HAMMING,
+                    6.76));
+
+
+// Connections:
+        tb->connect(wavSource, 0, multiplyGain, 0);
+        tb->connect(multiplyGain, 0, addConst, 0);
+        tb->connect(addConst, 0, repeat, 0);
+        tb->connect(repeat, 0, floatComplex, 0);
+        tb->connect(nullSource, 0, floatComplex, 1);
+        tb->connect(floatComplex, 0, lpf, 0);
+        tb->connect(lpf, 0, sdrSink, 0);
 
 //    gr::blocks::sub_ff::sptr subNoise = gr::blocks::sub_ff::make(1);
 //    gr::blocks::multiply_ff::sptr multiplierModulation = gr::blocks::multiply_ff::make(1);
@@ -105,12 +118,6 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
 //    tb->connect(adderModulation, 0, convertFloatComplex, 0);
 //    tb->connect(constImaginary, 0, convertFloatComplex, 1);
 //    tb->connect(convertFloatComplex, 0, sdrSink, 0);
-    //receive
-//    tb->connect(sdrSource, 0, convertComplexMag, 0);
-//    tb->connect(convertComplexMag, 0, lpf, 0);
-//    tb->connect(lpf, 0, subNoise, 0);
-//    tb->connect(constNoise, 0, subNoise, 1);
-//    tb->connect(subNoise, 0, wavSink, 0);
 
 //    GR_DEBUG("gnuradio", "constructed flowgraph");
     } catch (const std::exception &e) {
@@ -131,7 +138,7 @@ Java_net_bastibl_fmrx_MainActivity_fgStart(JNIEnv * env, jobject thiz, jstring t
 //    GR_DEBUG("gnuradio", "JNI starting flowgraph");
     try {
         tb->start();
-        tb->wait();
+//        tb->wait();
     } catch (const std::exception &e) {
         return env->NewStringUTF(e.what());
     }
