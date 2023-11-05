@@ -33,19 +33,55 @@ class MainActivity : AppCompatActivity() {
     var fileDescriptor: Int = -1
     var usbfsPath = ""
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         checkStoragePermission()
 
+        var errorMessage = ""
+
+        val initButton = findViewById<Button>(R.id.initButton)
+        initButton.setOnClickListener {
+            try {
+                val textView = findViewById<TextView>(R.id.fgStatus)
+                textView.text =
+                    "Status:\tFlowgraph Initialising..."
+                errorMessage = fgInit(fileDescriptor, usbfsPath)
+                displayNotification("Flowgraph initalised\nError:${errorMessage}")
+                textView.text =
+                    "Status:\tFlowgraph Initialised\n\t\tError:${errorMessage}"
+            } catch (e: Exception) {
+                displayNotification("Error running app")
+            }
+        }
+
         val startButton = findViewById<Button>(R.id.startButton)
         startButton.setOnClickListener {
             try {
-                var errorMessage = fgInit(fileDescriptor, "")
-                displayNotification("Flowgraph initalised\nError:${errorMessage}")
-//                errorMessage = fgStart(cacheDir.absolutePath)
-//                displayNotification("Flowgraph running, error:${errorMessage}")
+                val textView = findViewById<TextView>(R.id.fgStatus)
+                textView.text =
+                    "Status:\tFlowgraph Running..."
+                errorMessage = fgStart(cacheDir.absolutePath)
+                displayNotification("Flowgraph running\nError:${errorMessage}")
+                textView.text =
+                    "Status:\tFlowgraph Ended\n\t\tError:${errorMessage}"
+            } catch (e: Exception) {
+                displayNotification("Error running app")
+            }
+        }
+
+        val stopButton = findViewById<Button>(R.id.stopButton)
+        stopButton.setOnClickListener {
+            try {
+                val textView = findViewById<TextView>(R.id.fgStatus)
+                textView.text =
+                    "Status:\tFlowgraph Stopping"
+                fgStop()
+                displayNotification("Flowgraph stopped\nError:${errorMessage}")
+                textView.text =
+                    "Status:\tFlowgraph Stopped\n\t\tError:${errorMessage}"
             } catch (e: Exception) {
                 displayNotification("Error running app")
             }
@@ -54,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         val usbButton1 = findViewById<Button>(R.id.usbButton1)
         usbButton1.setOnClickListener {
             try {
-                var usbList = checkUSB()
+                val usbList = checkUSB()
                 displayNotification("USB Connections:\n${usbList}")
             } catch (e: Exception) {
                 displayNotification("Error running JNI code to check USB connections")
@@ -67,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 if(fileDescriptor == -1){
                     displayNotification("Invalid Filedescriptor\nDevice is not opened")
                 } else {
-                    var usbList = checkUSBTwo(fileDescriptor)
+                    val usbList = checkUSBTwo(fileDescriptor)
                     displayNotification("USB Connections:\n${usbList}")
                 }
             } catch (e: Exception) {
@@ -161,6 +197,7 @@ class MainActivity : AppCompatActivity() {
 
     private val usbReceiver = object : BroadcastReceiver() {
 
+        @SuppressLint("SetTextI18n")
         @Suppress("IMPLICIT_CAST_TO_ANY")
         override fun onReceive(context: Context, intent: Intent) {
             if (ACTION_USB_PERMISSION == intent.action) {
@@ -213,14 +250,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        fgStop()
         super.onStop()
     }
 
     private external fun fgInit(fd: Int, usbfsPath: String): String
     private external fun fgStart(tmpName: String): String
-    external fun fgStop(): Void
-    external fun checkUSB(): String
-    external fun checkUSBTwo(fd: Int): String
+    private external fun fgStop(): String
+    private external fun checkUSB(): String
+    private external fun checkUSBTwo(fd: Int): String
 
     companion object {
         init {

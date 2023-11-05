@@ -18,19 +18,54 @@
         android:textStyle="bold"
         android:textColor="#FF0000"
         android:gravity="center_horizontal"
+        app:layout_constraintTop_toTopOf="@id/usbButton1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/fgStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/statusDefault"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#F000FF"
+        android:gravity="center_horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/initButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/InitButton"
+        ap:layout_constraintRight_toLeftOf="@id/startButton"
+        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintBottom_toTopOf="@+id/usbButton1"
+        ap:layout_constraintTop_toTopOf="@id/fgStatus"/>
 
     <Button
         android:id="@+id/startButton"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:text="@string/StartButton"
-        ap:layout_constraintRight_toRightOf="parent"
-        ap:layout_constraintLeft_toLeftOf="parent"
+        ap:layout_constraintRight_toLeftOf="@id/stopButton"
+        ap:layout_constraintLeft_toRightOf="@id/initButton"
         ap:layout_constraintBottom_toTopOf="@+id/usbButton1"
-        ap:layout_constraintTop_toTopOf="@id/sampleText"/>
+        ap:layout_constraintTop_toTopOf="@id/fgStatus"/>
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/StopButton"
+        ap:layout_constraintRight_toRightOf="parent"
+        ap:layout_constraintLeft_toRightOf="@id/startButton"
+        ap:layout_constraintBottom_toTopOf="@+id/usbButton1"
+        ap:layout_constraintTop_toTopOf="@id/fgStatus"/>
 
     <Button
         android:id="@+id/usbButton1"

@@ -49,20 +49,18 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
     double samp_rate = 48e3;
     int decim = 16;
     double center_freq = 100e6;
-    float audio_gain = 0.8;
+    float audio_gain = 1.0;
     try {
 // Blocks:
 
-    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("", 0, "", "", fd); //serial="0009072C00D51D1F"
-        sdrSink->set_sample_rate(samp_rate);
-        sdrSink->set_center_freq(100e6, 0);
-        sdrSink->set_bandwidth(5e6, 0);
-        sdrSink->set_digital_filter(samp_rate, 0);
+    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("0009072C00D51D1F", 0, "", "", fd); //serial="0009072C00D51D1F"
+        sdrSink->set_sample_rate(sdr_rate);
+        sdrSink->set_center_freq(center_freq, 0);
         sdrSink->set_gain(10, 0);
         sdrSink->set_antenna(0, 0);
         sdrSink->calibrate(2.5e6, 0);
 
-    gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);;
+    gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);
     gr::blocks::repeat::sptr repeat = gr::blocks::repeat::make(sizeof(float)*1, decim);;
     gr::blocks::null_source::sptr nullSource = gr::blocks::null_source::make(sizeof(float)*1);;
     gr::blocks::multiply_const_ff::sptr multiplyGain = gr::blocks::multiply_const_ff::make(audio_gain);;
@@ -88,37 +86,6 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
         tb->connect(floatComplex, 0, lpf, 0);
         tb->connect(lpf, 0, sdrSink, 0);
 
-//    gr::blocks::sub_ff::sptr subNoise = gr::blocks::sub_ff::make(1);
-//    gr::blocks::multiply_ff::sptr multiplierModulation = gr::blocks::multiply_ff::make(1);
-//    gr::blocks::float_to_complex::sptr convertFloatComplex = gr::blocks::float_to_complex::make(1);
-//    gr::blocks::complex_to_mag::sptr convertComplexMag = gr::blocks::complex_to_mag::make(1);
-//    gr::blocks::add_ff::sptr adderNoise = gr::blocks::add_ff::make(1);
-//    gr::blocks::add_ff::sptr adderModulation = gr::blocks::add_ff::make(1);
-//    gr::analog::sig_source_f::sptr carrierSignal = gr::analog::sig_source_f::make(samp_rate, gr::analog::GR_COS_WAVE, (frequency * 10), 2, 0,0);
-//    gr::analog::sig_source_f::sptr constNoise = gr::analog::sig_source_f::make(0, gr::analog::GR_CONST_WAVE, 0, 0, static_cast<float>(2 * gain));
-//    gr::analog::sig_source_f::sptr constImaginary = gr::analog::sig_source_f::make(0, gr::analog::GR_CONST_WAVE, 0, 0, 0);
-//    gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);
-//    gr::blocks::wavfile_sink::sptr wavSink = gr::blocks::wavfile_sink::make("/storage/emulated/0/wavfiles/output.wav", 1, frequency );
-//    gr::filter::interp_fir_filter_fff::sptr lpf = gr::filter::interp_fir_filter_fff::make(
-//            1,
-//            gr::filter::firdes::low_pass(
-//                    gain,
-//                    samp_rate,
-//                    (frequency * 1.5),
-//                    2000,
-//                    gr::filter::firdes::WIN_HAMMING,
-//                    6.76));
-
-// Connections:
-    //send
-//    tb->connect(wavSource, 0, multiplierModulation, 0);
-//    tb->connect(carrierSignal, 0, multiplierModulation, 1);
-//    tb->connect(multiplierModulation, 0, adderModulation, 0);
-//    tb->connect(carrierSignal, 0, adderModulation, 1);
-//    tb->connect(adderModulation, 0, convertFloatComplex, 0);
-//    tb->connect(constImaginary, 0, convertFloatComplex, 1);
-//    tb->connect(convertFloatComplex, 0, sdrSink, 0);
-
 //    GR_DEBUG("gnuradio", "constructed flowgraph");
     } catch (const std::exception &e) {
         return env->NewStringUTF(e.what());
@@ -138,7 +105,7 @@ Java_net_bastibl_fmrx_MainActivity_fgStart(JNIEnv * env, jobject thiz, jstring t
 //    GR_DEBUG("gnuradio", "JNI starting flowgraph");
     try {
         tb->start();
-//        tb->wait();
+        tb->wait();
     } catch (const std::exception &e) {
         return env->NewStringUTF(e.what());
     }
@@ -147,12 +114,16 @@ Java_net_bastibl_fmrx_MainActivity_fgStart(JNIEnv * env, jobject thiz, jstring t
 }
 
 extern "C"
-JNIEXPORT jobject JNICALL
+JNIEXPORT jstring JNICALL
 Java_net_bastibl_fmrx_MainActivity_fgStop(JNIEnv * env, jobject thiz) {
-    tb->stop();
-    tb->wait();
+    try {
+        tb->stop();
+        tb->wait();
+    } catch (const std::exception &e) {
+        return env->NewStringUTF(e.what());
+    }
 
-    return nullptr;
+    return env->NewStringUTF("None");
 }
 
 extern "C"
@@ -208,7 +179,7 @@ Java_net_bastibl_fmrx_MainActivity_checkUSBTwo(JNIEnv *env, jobject thiz, jint f
 { 
     //Setting up and init
     libusb_context *ctx;
-	libusb_set_option(&ctx, LIBUSB_OPTION_WEAK_AUTHORITY, NULL);
+//	libusb_set_option(&ctx, LIBUSB_OPTION_WEAK_AUTHORITY, NULL);
     int r = libusb_init(&ctx);
     if(r < 0) return env->NewStringUTF((std::to_string(r) + ": Libusb init error").c_str());
 
