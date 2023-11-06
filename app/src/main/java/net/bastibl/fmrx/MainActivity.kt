@@ -46,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         initButton.setOnClickListener {
             try {
                 val textView = findViewById<TextView>(R.id.fgStatus)
-                textView.text =
-                    "Status:\tFlowgraph Initialising..."
+//                textView.text =
+//                    "Status:\tFlowgraph Initialising..."
                 errorMessage = fgInit(fileDescriptor, usbfsPath)
                 displayNotification("Flowgraph initalised\nError:${errorMessage}")
                 textView.text =
@@ -61,8 +61,8 @@ class MainActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             try {
                 val textView = findViewById<TextView>(R.id.fgStatus)
-                textView.text =
-                    "Status:\tFlowgraph Running..."
+//                textView.text =
+//                    "Status:\tFlowgraph Running..."
                 errorMessage = fgStart(cacheDir.absolutePath)
                 displayNotification("Flowgraph running\nError:${errorMessage}")
                 textView.text =
@@ -76,8 +76,8 @@ class MainActivity : AppCompatActivity() {
         stopButton.setOnClickListener {
             try {
                 val textView = findViewById<TextView>(R.id.fgStatus)
-                textView.text =
-                    "Status:\tFlowgraph Stopping"
+//                textView.text =
+//                    "Status:\tFlowgraph Stopping"
                 fgStop()
                 displayNotification("Flowgraph stopped\nError:${errorMessage}")
                 textView.text =
