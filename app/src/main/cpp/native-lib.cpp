@@ -66,15 +66,24 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
     gr::blocks::multiply_const_ff::sptr multiplyGain = gr::blocks::multiply_const_ff::make(audio_gain);;
     gr::blocks::float_to_complex::sptr floatComplex = gr::blocks::float_to_complex::make(1);;
     gr::blocks::add_const_ff::sptr addConst = gr::blocks::add_const_ff::make(1);
-    gr::filter::fir_filter_ccf::sptr lpf = gr::filter::fir_filter_ccf::make(
-            1,
-            gr::filter::firdes::low_pass(
-                    1,
-                    samp_rate,
-                    12e3,
-                    2e3,
-                    gr::filter::firdes::WIN_HAMMING,
-                    6.76));
+    gr::filter::interp_fir_filter_fff::sptr lpf = gr::filter::interp_fir_filter_fff::make(
+           1,
+           gr::filter::firdes::low_pass(
+                   1, //gain
+                   samp_rate,
+                   12e3,
+                   2e3,
+                   gr::filter::firdes::WIN_HAMMING,
+                   6.76));
+    // gr::filter::fir_filter_ccf::sptr lpf = gr::filter::fir_filter_ccf::make(
+    //         1,
+    //         gr::filter::firdes::low_pass(
+    //                 1,
+    //                 samp_rate,
+    //                 12e3,
+    //                 2e3,
+    //                 gr::filter::firdes::WIN_HAMMING,
+    //                 6.76));
 
 
 // Connections:
