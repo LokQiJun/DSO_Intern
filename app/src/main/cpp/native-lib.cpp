@@ -6,30 +6,36 @@
 
 // Get any GNU Radio headers
 #include <gnuradio/constants.h>
-#include <gnuradio/blocks/null_source.h>
-#include <gnuradio/blocks/null_sink.h>
-#include <gnuradio/blocks/ctrlport_probe2_f.h>
-#include <gnuradio/fft/ctrlport_probe_psd.h>
+//#include <gnuradio/blocks/null_source.h>
+//#include <gnuradio/blocks/null_sink.h>
+//#include <gnuradio/blocks/ctrlport_probe2_f.h>
+//#include <gnuradio/fft/ctrlport_probe_psd.h>
 
 #include <gnuradio/top_block.h>
 #include <gnuradio/blocks/add_const_ff.h>
 #include <gnuradio/blocks/float_to_complex.h>
 #include <gnuradio/blocks/multiply_const.h>
 #include <gnuradio/blocks/null_source.h>
+#include <gnuradio/blocks/add_blk.h>
+#include <gnuradio/blocks/complex_to_mag.h>
+#include <gnuradio/blocks/multiply.h>
+#include <gnuradio/blocks/sub.h>
 #include <gnuradio/blocks/repeat.h>
 #include <gnuradio/blocks/wavfile_source.h>
+#include <gnuradio/blocks/wavfile_sink.h>
 #include <gnuradio/filter/firdes.h>
 #include <gnuradio/filter/interp_fir_filter.h>
 #include <gnuradio/filter/fir_filter_blk.h>
+#include <gnuradio/analog/sig_source.h>
 
 #include <limesdr/source.h>
 #include <limesdr/sink.h>
+#include <libusb.h>
 
 #include <gnuradio/prefs.h>
 #include <gnuradio/sys_paths.h>
 #include <gnuradio/logger.h>
 
-#include <libusb.h>
 gr::top_block_sptr tb;
 
 
@@ -46,56 +52,68 @@ Java_net_bastibl_fmrx_MainActivity_fgInit(JNIEnv * env, jobject thiz, int fd, js
 
 // Variables:
     double sdr_rate = 2e6;
-    double samp_rate = 48e3;
+//    double samp_rate = 48e3;
     int decim = 16;
     double center_freq = 100e6;
-    float audio_gain = 1.0;
+    int samp_rate = 4800000;
+    double gain = 0.5;
+    int frequency = 48000;
     try {
 // Blocks:
 
-    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("0009072C00D51D1F", 0, "", "", fd); //serial="0009072C00D51D1F"
+    gr::limesdr::sink::sptr sdrSink = gr::limesdr::sink::make("0009072C00D51D1F", 0, "", ""); //serial="0009072C00D51D1F"
         sdrSink->set_sample_rate(sdr_rate);
         sdrSink->set_center_freq(center_freq, 0);
         sdrSink->set_gain(10, 0);
         sdrSink->set_antenna(0, 0);
         sdrSink->calibrate(2.5e6, 0);
 
-    gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);
-    gr::blocks::repeat::sptr repeat = gr::blocks::repeat::make(sizeof(float)*1, decim);;
-    gr::blocks::null_source::sptr nullSource = gr::blocks::null_source::make(sizeof(float)*1);;
-    gr::blocks::multiply_const_ff::sptr multiplyGain = gr::blocks::multiply_const_ff::make(audio_gain);;
-    gr::blocks::float_to_complex::sptr floatComplex = gr::blocks::float_to_complex::make(1);;
-    gr::blocks::add_const_ff::sptr addConst = gr::blocks::add_const_ff::make(1);
-    gr::filter::interp_fir_filter_ccf::sptr lpf = gr::filter::interp_fir_filter_ccf::make(
-           1,
-           gr::filter::firdes::low_pass(
-                   1, //gain
-                   samp_rate,
-                   12e3,
-                   2e3,
-                   gr::filter::firdes::WIN_HAMMING,
-                   6.76));
-    // gr::filter::fir_filter_ccf::sptr lpf = gr::filter::fir_filter_ccf::make(
-    //         1,
-    //         gr::filter::firdes::low_pass(
-    //                 1,
-    //                 samp_rate,
-    //                 12e3,
-    //                 2e3,
-    //                 gr::filter::firdes::WIN_HAMMING,
-    //                 6.76));
+//    gr::blocks::throttle::sptr limiter = gr::blocks::throttle::make(sizeof(gr_complex) * 1, samp_rate * 100, true);
+        gr::analog::sig_source_f::sptr testSignal = gr::analog::sig_source_f::make(samp_rate, gr::analog::GR_COS_WAVE, (frequency * 10), 2, 0,0);
 
+//        gr::blocks::sub_ff::sptr subNoise = gr::blocks::sub_ff::make(1);
+//        gr::blocks::multiply_ff::sptr multiplierModulation = gr::blocks::multiply_ff::make(1);
+        gr::blocks::float_to_complex::sptr convertFloatComplex = gr::blocks::float_to_complex::make(1);
+//        gr::blocks::complex_to_mag::sptr convertComplexMag = gr::blocks::complex_to_mag::make(1);
+//        gr::blocks::add_ff::sptr adderNoise = gr::blocks::add_ff::make(1);
+//        gr::blocks::add_ff::sptr adderModulation = gr::blocks::add_ff::make(1);
+//        gr::analog::sig_source_f::sptr carrierSignal = gr::analog::sig_source_f::make(samp_rate, gr::analog::GR_COS_WAVE, (frequency * 10), 2, 0,0);
+//        gr::analog::sig_source_f::sptr constNoise = gr::analog::sig_source_f::make(0, gr::analog::GR_CONST_WAVE, 0, 0, static_cast<float>(2 * gain));
+//        gr::analog::sig_source_f::sptr constImaginary = gr::analog::sig_source_f::make(0, gr::analog::GR_CONST_WAVE, 0, 0, 0);
+//        gr::blocks::wavfile_source::sptr wavSource = gr::blocks::wavfile_source::make("/storage/emulated/0/wavfiles/input.wav", false);
+//        gr::blocks::wavfile_sink::sptr wavSink = gr::blocks::wavfile_sink::make("/storage/emulated/0/wavfiles/output.wav", 1,
+//                                                                                static_cast<unsigned int>(frequency));
+//        gr::filter::interp_fir_filter_fff::sptr lpf = gr::filter::interp_fir_filter_fff::make(
+//                1,
+//                gr::filter::firdes::low_pass(
+//                        gain,
+//                        samp_rate,
+//                        (frequency * 1.5),
+//                        2000,
+//                        gr::filter::firdes::WIN_HAMMING,
+//                        6.76));
 
 // Connections:
-        tb->connect(wavSource, 0, multiplyGain, 0);
-        tb->connect(multiplyGain, 0, addConst, 0);
-        tb->connect(addConst, 0, repeat, 0);
-        tb->connect(repeat, 0, floatComplex, 0);
-        tb->connect(nullSource, 0, floatComplex, 1);
-        tb->connect(floatComplex, 0, lpf, 0);
-        tb->connect(lpf, 0, sdrSink, 0);
-
-//    GR_DEBUG("gnuradio", "constructed flowgraph");
+        //testing:
+        tb->connect(testSignal, 0, convertFloatComplex, 0);
+        tb->connect(convertFloatComplex, 0, sdrSink, 0);
+//        //send
+//        tb->connect(wavSource, 0, multiplierModulation, 0);
+//        tb->connect(carrierSignal, 0, multiplierModulation, 1);
+//        tb->connect(multiplierModulation, 0, adderModulation, 0);
+//        tb->connect(carrierSignal, 0, adderModulation, 1);
+//        tb->connect(adderModulation, 0, convertFloatComplex, 0);
+//        tb->connect(constImaginary, 0, convertFloatComplex, 1);
+////    tb->connect(convertFloatComplex, 0, sdrSink, 0);
+//        //receive
+////    tb->connect(sdrSource, 0, convertComplexMag, 0);
+//        tb->connect(convertFloatComplex, 0, convertComplexMag, 0);
+////    tb->connect(convertFloatComplex, 0, limiter, 0);
+////    tb->connect(limiter, 0, convertComplexMag, 0);
+//        tb->connect(convertComplexMag, 0, lpf, 0);
+//        tb->connect(lpf, 0, subNoise, 0);
+//        tb->connect(constNoise, 0, subNoise, 1);
+//        tb->connect(subNoise, 0, wavSink, 0);
     } catch (const std::exception &e) {
         return env->NewStringUTF(e.what());
     }
