@@ -1,26 +1,24 @@
-# GNU Radio Android FM Receiver
+# GNU Radio Android AM Transmitter
+Work done thus far on attempting to transmit an audio wav file from android using sdr.
+This app is adapted from [FM Receiver](https://github.com/bastibl/android-fm).
 
-This is a simple demo application for GNU Radio on Android, implementing an FM receiver that works with the RTL-SDR and the HackRF. 
+There is an apk file for internal audio file transfer in the folder named AM_Virtual together with the native.cpp for it.
 
 ## Installation
 
 Building the app requires the [GNU Radio Android toolchain](https://github.com/bastibl/gnuradio-android/). Please see this repository for further instructions on how to build the toolchain.
 
+I have also included the docker file here in the docker folder together with some additional build scripts.
+
+### Things to note when running toolchain
+* App in Android Studio uses NDK v20.0.5594570 by default while GNU Radio Android toolchain builds NDK v21.3.6528147 by default. 
+* To change NDK version of App, modify the version number in app/build.gradle under sourceSets
+![screenshot](./md_resources/ndk_version_app.PNG)
+* To change NDK version of toolchain container, download the required NDK version from Android studio, change the version number in the export toolchain root line in the [build.sh](https://github.com/bastibl/gnuradio-android/blob/main/build.sh)/[build_aarch64.sh](https://github.com/bastibl/gnuradio-android/blob/main/build_aarch64.sh) file ![screenshot](./md_resources/ndk_version_toolchain.PNG)
+
 ## Running the App
 
-The USB vender/product IDs and the device type (HackRF or RTL-SDR) are currently hardcoded. Please adapt `native_lib.cpp` and `MainActivity.kt` accordingly.
+The USB vender/product IDs and the device type are hardcoded. Please adapt `native_lib.cpp` and `MainActivity.kt` accordingly.
 
-## YouTube Video
-
-[![FM Receiver](https://img.youtube.com/vi/8ReyVzUyppA/0.jpg)](https://www.youtube.com/watch?v=8ReyVzUyppA)
-
-## Publication
-
-If you use this project, we would appreciate a reference to:
-
-<ul>
-<li>
-<a href="http://dx.doi.org/10.1145/3411276.3412184"><img src="https://www.bastibl.net/bib/icons/ACM-logo.gif" title="ACM" alt=""></a> <a class="bibauthorlink" href="https://www.bastibl.net/">Bastian Bloessl</a>, Lars Baumgärtner and Matthias Hollick, “<strong>Hardware-Accelerated Real-Time Stream Data Processing on Android with GNU Radio</strong>,” Proceedings of 14th International Workshop on Wireless Network Testbeds, Experimental evaluation &amp; Characterization (WiNTECH’20), London, UK, September 2020.
- <small>[<a href="http://dx.doi.org/10.1145/3411276.3412184">DOI</a>, <a href="https://www.bastibl.net/bib/bloessl2020hardware/bloessl2020hardware.bib">BibTeX</a>, <a href="https://www.bastibl.net/bib/bloessl2020hardware/">PDF and Details…</a>]</small></p>
-</li>
-</ul>
+## References
+[GNU Radio Wiki](https://wiki.gnuradio.org/index.php/Android)

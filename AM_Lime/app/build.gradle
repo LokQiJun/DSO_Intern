@@ -39,7 +39,7 @@ android {
 
     sourceSets {
         main {
-            jniLibs.srcDirs = ['../../gnuradio-android/toolchain/jni', '../../../Android/Sdk/ndk/20.0.5594570/sources/cxx-stl/llvm-libc++/libs']
+            jniLibs.srcDirs = ['../../../gnuradio-android/toolchain/jni', '../../../../Android/Sdk/ndk/20.0.5594570/sources/cxx-stl/llvm-libc++/libs']
         }
     }
 }
