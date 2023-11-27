@@ -19,6 +19,7 @@ I have also included the docker file here in the docker folder together with som
 ## Running the App
 
 The USB vender/product IDs and the device type are hardcoded. Please adapt `native_lib.cpp` and `MainActivity.kt` accordingly.
+<br><br>The path to .wav file is hardcoded in `native_lib.cpp`. <br>Audio .wav files used has to be in a folder under wavfiles and named as input.wav
 
 ## References
 [GNU Radio Wiki](https://wiki.gnuradio.org/index.php/Android)
