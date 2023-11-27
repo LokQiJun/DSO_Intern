@@ -1,0 +1,20 @@
+TOOLCHAIN_ROOT=/home/android/Android/Sdk/ndk/20.0.5594570
+HOST_ARCH=linux-x86_64
+SYS_ROOT=/home/android/Android/Sdk/ndk/20.0.5594570/sysroot
+TOOLCHAIN_BIN=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin
+API_LEVEL=29
+CC=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
+CXX=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
+LD=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
+AR=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
+ANLIB=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ranlib
+STRIP=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip
+eadlink -f ./buildvolk.sh
+dirname /home/android/src/gnuradio-android/buildvolk.sh
+BUILD_ROOT=/home/android/src/gnuradio-android
+ATH=/home/android/Android/Sdk/ndk/20.0.5594570/toolchains/llvm/prebuilt/linux-x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PREFIX=/home/android/src/gnuradio-android/toolchain/arm64-v8a
+PKG_CONFIG_PATH=/home/android/src/gnuradio-android/toolchain/arm64-v8a/lib/pkgconfig
+NCORES=2
+
+
