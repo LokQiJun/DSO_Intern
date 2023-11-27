@@ -62,6 +62,7 @@ RUN ./build_aarch64.sh
 
 WORKDIR /home/$USER/src
 RUN git clone https://github.com/bastibl/android-fm.git
+RUN git clone https://github.com/LokQiJun/DSO_Intern.git
 # RUN git clone https://github.com/bastibl/android-benchmark.git
 # RUN git clone https://github.com/bastibl/android-volk.git
 #RUN git clone https://github.com/bastibl/android-hw.git
